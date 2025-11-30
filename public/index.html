@@ -3,43 +3,146 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Breezy HubSpot Integration - Example</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 20px;
-        }
-        h1 {
-            color: #ff7a59;
-        }
-        .note {
-            background: #f0f0f0;
-            padding: 15px;
-            border-radius: 5px;
-            margin-bottom: 20px;
-        }
-    </style>
+    <title>Breezy Admin – HubSpot Integration POC</title>
+    <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <h1>Breezy HubSpot Integration POC</h1>
-    
-    <div class="note">
-        <strong>Note:</strong> This is just a placeholder file. Build your frontend solution here or in a separate directory.
-        <br><br>
-        <strong>Backend server:</strong> Make sure your backend is running on <code>http://localhost:3001</code>
-        <br><br>
-        <strong>Your task:</strong>
-        <ul>
-            <li>Display contacts from <code>GET /api/contacts</code></li>
-            <li>Create contacts via <code>POST /api/contacts</code></li>
-            <li>Create deals via <code>POST /api/deals</code></li>
-            <li>Show deals for each contact</li>
-            <li>Add an AI-powered feature</li>
-        </ul>
-    </div>
+    <header class="app-header">
+        <h1>Breezy Admin – HubSpot Integration POC</h1>
+    </header>
 
-    <p>Delete this file and build your own frontend solution!</p>
+    <main class="app-container">
+        <!-- Left Column -->
+        <section class="left-column">
+            <!-- Contacts Table -->
+            <div class="contacts-section">
+                <h2>Contacts</h2>
+                <div class="table-container">
+                    <table id="contacts-table" class="data-table">
+                        <thead>
+                            <tr>
+                                <th>First Name</th>
+                                <th>Last Name</th>
+                                <th>Email</th>
+                                <th>Job Title</th>
+                                <th>Company</th>
+                            </tr>
+                        </thead>
+                        <tbody id="contacts-table-body">
+                            <!-- Contacts will be populated here via JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Create Contact Form -->
+            <div class="form-section">
+                <h2>Create Contact</h2>
+                <form id="create-contact-form" class="form">
+                    <div class="form-group">
+                        <label for="contact-firstname">First Name <span class="required">*</span></label>
+                        <input type="text" id="contact-firstname" name="firstname" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="contact-lastname">Last Name <span class="required">*</span></label>
+                        <input type="text" id="contact-lastname" name="lastname" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="contact-email">Email <span class="required">*</span></label>
+                        <input type="email" id="contact-email" name="email" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="contact-phone">Phone</label>
+                        <input type="tel" id="contact-phone" name="phone">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="contact-address">Address</label>
+                        <input type="text" id="contact-address" name="address">
+                    </div>
+
+                    <button type="submit" class="btn btn-primary">Create Contact</button>
+                </form>
+            </div>
+        </section>
+
+        <!-- Right Column -->
+        <section class="right-column">
+            <!-- Selected Contact Info -->
+            <div class="selected-contact-section">
+                <h2>Selected Contact</h2>
+                <div id="selected-contact-info" class="contact-info">
+                    <p class="placeholder-text">Select a contact from the table to view details</p>
+                </div>
+            </div>
+
+            <!-- Deals Table -->
+            <div class="deals-section">
+                <h2>Deals</h2>
+                <div class="table-container">
+                    <table id="deals-table" class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Deal Name</th>
+                                <th>Amount</th>
+                                <th>Stage</th>
+                            </tr>
+                        </thead>
+                        <tbody id="deals-table-body">
+                            <!-- Deals will be populated here via JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Create Deal Form -->
+            <div class="form-section">
+                <h2>Create Deal</h2>
+                <form id="create-deal-form" class="form">
+                    <div class="form-group">
+                        <label for="deal-name">Deal Name <span class="required">*</span></label>
+                        <input type="text" id="deal-name" name="dealname" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="deal-amount">Amount <span class="required">*</span></label>
+                        <input type="number" id="deal-amount" name="amount" min="0" step="0.01" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="deal-stage">Deal Stage <span class="required">*</span></label>
+                        <select id="deal-stage" name="dealstage" required>
+                            <option value="appointmentscheduled">Appointment Scheduled</option>
+                            <option value="qualifiedtobuy">Qualified to Buy</option>
+                            <option value="presentationscheduled">Presentation Scheduled</option>
+                            <option value="decisionmakerboughtin">Decision Maker Bought-In</option>
+                            <option value="contractsent">Contract Sent</option>
+                            <option value="closedwon" selected>Closed Won</option>
+                            <option value="closedlost">Closed Lost</option>
+                        </select>
+                    </div>
+
+                    <input type="hidden" id="deal-contact-id" name="contactId">
+
+                    <button type="submit" class="btn btn-primary">Create Deal</button>
+                </form>
+            </div>
+
+            <!-- AI Insight Card -->
+            <div class="ai-insight-section">
+                <div id="ai-insight-card" class="card ai-card">
+                    <h3>AI Insight</h3>
+                    <p class="insight-text">
+                        This is where Breezy could surface AI-powered insights about usage and upsell potential.
+                    </p>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <script src="app.js"></script>
 </body>
 </html>
