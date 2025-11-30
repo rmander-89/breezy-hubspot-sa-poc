@@ -290,10 +290,14 @@ async function handleCreateContactSubmit(event) {
         // Show success message
         showFormSuccess('create-contact-form', '✓ Contact created successfully!');
 
+        console.log('Created contact with ID:', newContact.id);
+
         // Wait for HubSpot's search index to update (Search API has eventual consistency)
-        await new Promise(resolve => setTimeout(resolve, 5000));
+        console.log('Waiting 7 seconds for HubSpot to index the new contact...');
+        await new Promise(resolve => setTimeout(resolve, 7000));
 
         // Reload contacts (should now include the new contact at the top)
+        console.log('Reloading contacts...');
         await loadContacts();
 
         // Optionally select the newly created contact
@@ -479,6 +483,8 @@ async function loadContacts() {
     showContactsLoading();
     try {
         const contacts = await fetchContacts();
+        console.log('Fetched contacts:', contacts.length, 'contacts');
+        console.log('First contact:', contacts[0]);
         state.contacts = contacts;
         renderContacts(contacts);
     } catch (error) {
