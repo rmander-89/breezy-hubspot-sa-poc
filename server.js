@@ -33,23 +33,30 @@ app.get('/health', (req, res) => {
   });
 });
 
-// GET endpoint - Fetch contacts from HubSpot
+// GET endpoint - Fetch contacts from HubSpot (sorted by creation date, newest first)
 app.get('/api/contacts', async (req, res) => {
   try {
-    const response = await axios.get(
-      `${HUBSPOT_API_BASE}/crm/v3/objects/contacts`,
+    const response = await axios.post(
+      `${HUBSPOT_API_BASE}/crm/v3/objects/contacts/search`,
+      {
+        limit: 50,
+        sorts: [
+          {
+            propertyName: 'createdate',
+            direction: 'DESCENDING'
+          }
+        ],
+        properties: ['firstname', 'lastname', 'email', 'phone', 'address', 'company', 'jobtitle']
+      },
       {
         headers: {
           'Authorization': `Bearer ${HUBSPOT_TOKEN}`,
           'Content-Type': 'application/json'
-        },
-        params: {
-          limit: 50,
-          properties: 'firstname,lastname,email,phone,address,jobtitle,company'
         }
       }
     );
-    res.json(response.data);
+    // Return only the results array
+    res.json(response.data.results);
   } catch (error) {
     console.error('Error fetching contacts:', error.response?.data || error.message);
     res.status(error.response?.status || 500).json({

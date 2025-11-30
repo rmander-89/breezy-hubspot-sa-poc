@@ -26,7 +26,8 @@ async function fetchContacts() {
         throw new Error(`Failed to fetch contacts: ${response.statusText}`);
     }
     const data = await response.json();
-    return data.results || [];
+    // Server now returns the array directly (sorted by createdate DESC)
+    return data || [];
 }
 
 /**
