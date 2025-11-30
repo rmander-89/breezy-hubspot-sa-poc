@@ -25,7 +25,8 @@ async function fetchContacts() {
     if (!response.ok) {
         throw new Error(`Failed to fetch contacts: ${response.statusText}`);
     }
-    return await response.json();
+    const data = await response.json();
+    return data.results || [];
 }
 
 /**
@@ -54,7 +55,8 @@ async function fetchDealsForContact(contactId) {
     if (!response.ok) {
         throw new Error(`Failed to fetch deals: ${response.statusText}`);
     }
-    return await response.json();
+    const data = await response.json();
+    return data.results || [];
 }
 
 /**
