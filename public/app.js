@@ -283,11 +283,17 @@ async function handleCreateContactSubmit(event) {
         // Create the contact
         const newContact = await createContact(properties);
 
-        // Clear form
+        // Clear form and errors
         event.target.reset();
         clearFormError('create-contact-form');
 
-        // Reload contacts
+        // Show success message
+        showFormSuccess('create-contact-form', '✓ Contact created successfully!');
+
+        // Wait for HubSpot's search index to update (Search API has eventual consistency)
+        await new Promise(resolve => setTimeout(resolve, 1500));
+
+        // Reload contacts (should now include the new contact at the top)
         await loadContacts();
 
         // Optionally select the newly created contact
@@ -352,11 +358,14 @@ async function handleCreateDealSubmit(event) {
         // Create the deal
         await createDeal(dealProperties, state.selectedContactId);
 
-        // Clear form
+        // Clear form and errors
         event.target.reset();
         // Reset to default value
         document.getElementById('deal-stage').value = 'closedwon';
         clearFormError('create-deal-form');
+
+        // Show success message
+        showFormSuccess('create-deal-form', '✓ Deal created successfully!');
 
         // Reload deals for the current contact
         await loadDealsForContact(state.selectedContactId);
@@ -408,6 +417,7 @@ function formatDealStage(stage) {
  */
 function showFormError(formId, message) {
     clearFormError(formId);
+    clearFormSuccess(formId);
     const form = document.getElementById(formId);
     const errorDiv = document.createElement('div');
     errorDiv.className = 'form-error';
@@ -428,6 +438,35 @@ function clearFormError(formId) {
     const existingError = form.querySelector('.form-error');
     if (existingError) {
         existingError.remove();
+    }
+}
+
+/**
+ * Show form success message
+ */
+function showFormSuccess(formId, message) {
+    clearFormError(formId);
+    clearFormSuccess(formId);
+    const form = document.getElementById(formId);
+    const successDiv = document.createElement('div');
+    successDiv.className = 'form-success';
+    successDiv.style.color = '#2e7d32';
+    successDiv.style.marginTop = '10px';
+    successDiv.style.padding = '10px';
+    successDiv.style.backgroundColor = '#e8f5e9';
+    successDiv.style.borderRadius = '4px';
+    successDiv.textContent = message;
+    form.appendChild(successDiv);
+}
+
+/**
+ * Clear form success message
+ */
+function clearFormSuccess(formId) {
+    const form = document.getElementById(formId);
+    const existingSuccess = form.querySelector('.form-success');
+    if (existingSuccess) {
+        existingSuccess.remove();
     }
 }
 
