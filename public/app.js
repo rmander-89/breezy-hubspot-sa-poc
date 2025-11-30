@@ -291,7 +291,7 @@ async function handleCreateContactSubmit(event) {
         showFormSuccess('create-contact-form', '✓ Contact created successfully!');
 
         // Wait for HubSpot's search index to update (Search API has eventual consistency)
-        await new Promise(resolve => setTimeout(resolve, 1500));
+        await new Promise(resolve => setTimeout(resolve, 5000));
 
         // Reload contacts (should now include the new contact at the top)
         await loadContacts();
