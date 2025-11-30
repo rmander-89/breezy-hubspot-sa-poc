@@ -1,0 +1,224 @@
+/* ===== Global Styles ===== */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background-color: #f5f5f5;
+    padding: 20px;
+    line-height: 1.6;
+    color: #333;
+}
+
+/* ===== Header ===== */
+.app-header {
+    background-color: #fff;
+    padding: 20px;
+    margin-bottom: 20px;
+    border-radius: 8px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.app-header h1 {
+    color: #ff7a59;
+    font-size: 24px;
+}
+
+/* ===== Layout ===== */
+.app-container {
+    display: flex;
+    gap: 20px;
+}
+
+.left-column,
+.right-column {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+/* Stack columns on small screens */
+@media (max-width: 800px) {
+    .app-container {
+        flex-direction: column;
+    }
+}
+
+/* ===== Cards and Sections ===== */
+.contacts-section,
+.form-section,
+.selected-contact-section,
+.deals-section,
+.ai-insight-section {
+    background-color: #fff;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 20px;
+}
+
+.contacts-section h2,
+.form-section h2,
+.selected-contact-section h2,
+.deals-section h2 {
+    margin-bottom: 15px;
+    font-size: 18px;
+    color: #333;
+}
+
+/* ===== Tables ===== */
+.table-container {
+    overflow-x: auto;
+}
+
+.data-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.data-table thead {
+    background-color: #f9f9f9;
+}
+
+.data-table th {
+    padding: 12px;
+    text-align: left;
+    font-weight: 600;
+    border-bottom: 2px solid #ddd;
+    font-size: 14px;
+}
+
+.data-table td {
+    padding: 12px;
+    border-bottom: 1px solid #eee;
+    font-size: 14px;
+}
+
+.data-table tbody tr {
+    transition: background-color 0.2s;
+}
+
+.data-table tbody tr:hover {
+    background-color: #f9f9f9;
+}
+
+/* Selected row styling */
+.contact-row {
+    cursor: pointer;
+}
+
+.contact-row.selected-row {
+    background-color: #e3f2fd;
+}
+
+.contact-row.selected-row:hover {
+    background-color: #bbdefb;
+}
+
+/* ===== Forms ===== */
+.form {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.form-group label {
+    font-size: 14px;
+    font-weight: 500;
+    color: #555;
+}
+
+.required {
+    color: #d32f2f;
+}
+
+.form-group input,
+.form-group select {
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 14px;
+    font-family: inherit;
+}
+
+.form-group input:focus,
+.form-group select:focus {
+    outline: none;
+    border-color: #1976d2;
+}
+
+/* ===== Buttons ===== */
+.btn {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 4px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.btn-primary {
+    background-color: #1976d2;
+    color: #fff;
+}
+
+.btn-primary:hover:not(:disabled) {
+    background-color: #1565c0;
+}
+
+.btn-primary:disabled {
+    background-color: #90caf9;
+    cursor: not-allowed;
+}
+
+/* ===== Contact Info ===== */
+.contact-info {
+    font-size: 14px;
+}
+
+.contact-info .placeholder-text {
+    color: #999;
+    font-style: italic;
+}
+
+.contact-details p {
+    margin-bottom: 8px;
+}
+
+/* ===== AI Insight Card ===== */
+.ai-card {
+    background-color: #f0f7ff;
+    border: 1px solid #1976d2;
+}
+
+.ai-card h3 {
+    color: #1976d2;
+    font-size: 16px;
+    margin-bottom: 10px;
+}
+
+.insight-text {
+    color: #555;
+    font-size: 14px;
+    font-style: italic;
+}
+
+/* ===== Error Messages ===== */
+.form-error {
+    color: #d32f2f;
+    background-color: #ffebee;
+    padding: 10px;
+    border-radius: 4px;
+    font-size: 14px;
+    margin-top: 10px;
+}
