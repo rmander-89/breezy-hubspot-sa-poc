@@ -430,3 +430,24 @@ I used the CRM Search API with sorting by createdate to surface newly created co
 ## **7. Simulated usage for the AI feature**
 
 Usage ingestion was out of scope, so I simulated usage signals in the backend. This still demonstrates how Breezy could combine trial timing, usage and deal history to generate meaningful AI insights and sets the stage for a future ingestion model.
+
+# **H. Future Enhancements**
+
+This proof of concept focuses on demonstrating the integration patterns rather than delivering a full production implementation. Below are the key areas that Breezy could develop further if this were taken beyond a POC.
+
+## **1. Real usage ingestion**
+In a full implementation Breezy would stream real usage events from their platform into HubSpot, rather than relying on simulated values. This would enable much more accurate onboarding journeys, churn prevention and AI driven next best actions.
+
+## **2. Write AI insights back into HubSpot**
+The AI feature currently displays insights in the UI only. A natural next step would be to write fields such as conversion likelihood or next best action back to the Contact, allowing Breezy to use these in lists, segmentation and workflows.
+
+## **3. Subscription object refinement**
+If Breezy chose not to use HubSpot Payments, they could introduce a custom Subscription object and manage renewals, cancellations and upgrades through their own billing system. This would keep HubSpot aligned with their payment provider while maintaining the same data structure.
+
+## **4. Pagination and search in the frontend**
+The POC intentionally limits contacts to the first fifty returned by HubSpot. A future version could include full pagination, free text search and filtering for a smoother admin experience.
+
+## **5. Authentication and roles**
+Adding user authentication and basic permissions would help secure the admin panel and support different internal roles such as support, marketing or operations.
+
+These enhancements reflect natural next steps once Breezy moves from a proof of concept into a long term, production grade HubSpot integration.
