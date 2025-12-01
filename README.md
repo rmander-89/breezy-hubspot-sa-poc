@@ -148,6 +148,16 @@ This is intentionally a simplified demonstration focused on integration patterns
 
 # **C. AI Usage Documentation**
 
+### **AI model usage during development**
+
+For clarity, two different AI models were used during the development of this proof of concept:
+
+- **ChatGPT 5.1 (UI model):**  
+  Used for planning, reasoning through design choices, validating the RFM concept and refining prompts before sending them to Claude Code.
+
+- **Claude Code (Sonnet 4.5):**  
+  Used in browser to generate and update frontend and backend files, implement API logic and build the AI endpoint based on the refined prompts.
+
 I used AI throughout this assessment as a support, not as the decision maker. The structure, architecture and approach all came from my own interpretation of Breezy’s business model and the assignment requirements. AI was used to accelerate specific tasks, validate thinking and help generate clean, testable code.
 
 I used ChatGPT mainly for guidance at key points. Early on it helped clarify some practical setup tasks, such as getting the starter repository into VS Code, understanding how the backend was structured and confirming the correct workflow when Claude Code was committing changes directly to GitHub. I also used ChatGPT to help refine prompts before sending them to Claude Code. Rather than giving Claude one large instruction, I used ChatGPT to break the work into focused, assignment-aligned prompts covering contacts, deals, the admin layout and basic styling.
