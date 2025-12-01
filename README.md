@@ -138,28 +138,28 @@ A practical learning from this exercise is that not all AI tools are suited to a
 
 # **D. HubSpot Data Architecture**
 
-This section describes the data model designed for Breezy, why each object exists, how they relate to each other and why these choices support Breezy’s hardware and SaaS business. The model keeps the Contact as the single source of truth and layers hardware, subscriptions, payments, usage activity and support tickets around it.
+This section explains the data model designed for Breezy, why each object exists, how the associations work and how this structure supports Breezy’s hardware, SaaS and usage driven business. The design keeps the Contact as the single source of truth, with all other objects organised around it.
 
 ## **1. Core Object Model and Ownership**
 
 ### **1.1 Contact as the source of truth**
 
-The Contact is the main record that everything else relates back to. It represents the customer or household and holds all identity information, trial state and usage rollups. A single Contact can own devices, start a free trial, become a subscriber and later upgrade or churn.
+The Contact is the foundation of the entire architecture. It represents the customer or household and holds identity, trial status and the rolled up usage information that is required for onboarding and conversion. Every other object connects back to the Contact.
 
-Trial specific fields live directly on the Contact. Examples include:
+Trial details are stored directly on the Contact using properties such as:
 - breezy_trial_status  
 - breezy_trial_start_date  
 - breezy_trial_end_date  
 - breezy_last_login_date  
 - breezy_last_usage_event  
 
-This avoids using a deal pipeline for trial tracking and keeps trials simple, clear and easy to automate in HubSpot. It also aligns with how marketing teams usually want to enrol customers in workflows, which is generally property based rather than driven by deal records.
+Storing trial status on the Contact avoids creating a deal for every free trial and keeps trial tracking simple, scalable and aligned with how marketing teams want to enrol people into workflows.
 
 ### **1.2 Thermostat custom object**
 
-Thermostats are represented as a custom object. A Contact can have many Thermostats. This separates the person from the device fleet and allows Breezy to track device level detail and ownership.
+Thermostats are represented as a custom object because hardware ownership is essential to Breezy’s business model. A Contact can have many Thermostats. This separates the individual from the device fleet and allows Breezy to track device level behaviour and support needs.
 
-Key fields include:
+Example properties include:
 - serial_number  
 - model  
 - installation_date  
@@ -168,7 +168,7 @@ Key fields include:
 - energy_savings_score  
 - device_status  
 
-Thermostats are associated to the Contact so Breezy has a full view of device ownership. This also enables useful future scenarios, such as identifying multi device households or linking tickets to specific devices. A future extension could include linking a Thermostat to a Subscription if Breezy ever moves to per device subscription billing.
+Thermostats are associated with the Contact so Breezy can understand which devices belong to which household. Tickets and hardware deals link to Thermostats so device level issues and purchases can be tracked clearly. In the future Breezy could optionally associate Thermostats with Subscriptions if they ever move to a per device subscription model.
 
 ---
 
@@ -176,40 +176,32 @@ Thermostats are associated to the Contact so Breezy has a full view of device ow
 
 ### **2.1 Free trial driven from hardware purchase**
 
-When a thermostat is purchased, Breezy would create or update the Contact, create a Thermostat object and start the free trial. Trial fields on the Contact would be updated as follows:
+A hardware purchase is the logical starting point for the Breezy Premium trial. When a thermostat is purchased, Breezy would create or update the Contact, create a Thermostat record and set the trial properties on the Contact. For example:
 - breezy_trial_status = active  
 - breezy_trial_start_date = purchase_date  
 - breezy_trial_end_date = purchase_date + 30 days  
 
-This keeps the trial aligned with the hardware lifecycle and avoids creating additional deals for every trial.
+This ties the SaaS trial to the device lifecycle and avoids generating unnecessary deals for every trial.
 
 ### **2.2 No separate trial deal pipeline**
 
-There were two possible designs:
-- A trial pipeline with one deal per free trial  
-- Tracking trial state only on the Contact  
-
-I deliberately chose to store trial information on the Contact. It is simpler, avoids cluttering the CRM with unnecessary deals and fits better with marketing automation, where enrolment based on contact properties is more natural. It also avoids any complexity around making sure the correct deal is updated later.
+There were two possible approaches to modelling trials. The first was to create a separate trial pipeline with one deal per trial. The second was to store trial status entirely on the Contact. I chose the second option. It avoids creating unnecessary deals, reduces CRM noise and works better with marketing automation because workflows can enrol based on simple property values rather than deal updates. It also avoids the complexity of updating the right deal later.
 
 ---
 
 ## **3. Payment Links, Subscription Creation and Email Flows**
 
-### **3.1 Use of static payment links**
+### **3.1 Static payment links for monthly and annual upgrades**
 
-For subscription upgrades, the recommended approach is to use two static payment links created in HubSpot Payments:
-- Monthly link  
-- Annual link  
+For subscription upgrades the simplest and most scalable approach is to use two static payment links in HubSpot Payments. One link is for monthly billing and one is for annual billing. These can be added to onboarding emails during the early trial period and then to higher intent upgrade emails as the trial approaches expiry.
 
-These can be dropped into marketing emails, including onboarding emails and trial ending emails. Quotes and per contact payment links were not used, as they would be too heavy for a B2C model and far less efficient in workflows.
+Quotes or per contact payment links were rejected because they are heavy for a B2C workflow, difficult to scale and unnecessary when a simple static link is sufficient.
 
-### **3.2 Commerce behaviour after payment link completion**
+### **3.2 Commerce behaviour and alternative options if HubSpot Payments is not used**
 
-When a customer completes a payment link, HubSpot Commerce automatically creates:
-- a Payment  
-- a Subscription  
+When a customer completes a HubSpot payment link, HubSpot automatically creates a Payment record and a Subscription record and associates them with the Contact based on email. HubSpot does create a Payment object whenever a link is completed. The Payment is linked to an Invoice and to the Subscription and appears inside the commerce object set.
 
-These are associated with the Contact by email. A Subscription based workflow then creates a subscription deal with the correct deal amount and the correct recurring revenue fields. The payment link therefore becomes the trigger for the creation of all downstream commercial records. Deals act as a reporting layer, not the system of record for billing.
+If Breezy did not want to use HubSpot Payments there are two alternative approaches. The first is to continue linking out to a product like Stripe or a custom checkout page and then create the relevant HubSpot records through the CRM API. This could include creating a subscription deal and creating a custom subscription record. The second option is to replace the native HubSpot Subscription entirely and use a custom Subscription object that Breezy manages themselves. This gives full control but requires Breezy to implement renewals, cancellations and upgrades manually. For this assessment the native Subscription object was used because it is simpler and integrates cleanly with workflows and Payments.
 
 ---
 
@@ -217,84 +209,62 @@ These are associated with the Contact by email. A Subscription based workflow th
 
 ### **4.1 Hardware deals and subscription deals**
 
-The model separates hardware revenue from SaaS revenue. Hardware purchases become Closed Won deals in a hardware pipeline and are associated with both the Contact and the Thermostat. Subscription deals are created from the Subscription workflow and represent the commercial event, such as new business or an upgrade. This keeps reporting clean and makes it easy to distinguish one off revenue from recurring revenue.
+The model separates hardware revenue from subscription revenue. Hardware purchases produce Closed Won deals in a hardware pipeline and are associated with both the Contact and the relevant Thermostat. Subscription deals are created via a workflow when a Subscription is created and represent events such as initial conversion, upgrade or renewal. These deals sit in a separate subscription pipeline and make it easy to distinguish one off revenue from recurring revenue.
 
 ### **4.2 Recurring revenue fields on subscription deals**
 
-Subscription deals use HubSpot’s recurring revenue properties. For example:
-- recurring_revenue_deal_type set to New business for the first subscription  
-- recurring_revenue_amount stored as a monthly equivalent  
-- recurring_revenue_type set to monthly or annual  
+Subscription deals make use of HubSpot’s recurring revenue framework. For example:
+- recurring_revenue_deal_type is set to New business for the first subscription  
+- recurring_revenue_amount stores the monthly equivalent revenue  
+- recurring_revenue_type stores whether it is monthly or annual  
 
-When subscriptions change state, the inactive fields are set, such as:
+When subscriptions change state the workflow updates the inactive fields such as:
 - recurring_revenue_inactive_date  
 - recurring_revenue_inactive_reason  
 
-A new deal is created for upgrades or renewals. This approach makes full use of HubSpot’s Revenue Analytics and shows an understanding of how to track SaaS revenue correctly.
+A new deal is created for upgrades or renewals. This allows Breezy to use HubSpot’s recurring revenue analytics for accurate MRR and ARR reporting.
 
 ---
 
 ## **5. Workflows and Automation**
 
-### **5.1 Subscription to deal workflow**
+### **5.1 Subscription to deal workflow and why it is cleaner**
 
-The cleanest trigger for creating subscription deals is the Subscription itself. A workflow listening for subscription creation sets:
-- deal amount  
-- recurring revenue fields  
-- close date  
+The Subscription object is the cleanest trigger for creating subscription deals because it represents the truth of what the customer has purchased. A workflow triggered on subscription creation sets the deal amount, the recurring revenue fields and the close date. When the Subscription later cancels or expires the workflow updates the inactive fields. This keeps the deal aligned with the Subscription without any risk of mismatching values.
 
-When the Subscription later cancels or expires, the workflow updates the recurring revenue inactive fields. This avoids the complexity of trying to update the correct deal from a Contact based workflow.
-
-### **5.2 Avoiding deal based triggers from payments on Contacts**
-
-It is possible to enrol Contacts in workflows based on Payments, but updating the correct associated deal becomes difficult because workflows operate on one object at a time. Using Subscription based workflows is more reliable and aligns naturally with how Commerce objects are structured.
+Using Contact based triggers was avoided because updating the correct deal from a Contact workflow is difficult. Workflows operate on one primary object at a time and updating a specific deal requires association labels to identify which deal to change. This introduces complexity that is not needed when the Subscription object already provides a clear and deterministic lifecycle anchor.
 
 ---
 
 ## **6. Usage Data and AI Readiness**
 
-### **6.1 Usage ingestion design**
+### **6.1 Usage ingestion concept**
 
-Although not fully implemented, I designed the usage pattern with future state in mind. Breezy’s platform would periodically sync:
+Although not fully implemented, the design anticipates a future state where Breezy’s SaaS platform periodically syncs usage signals such as:
 - logins  
 - schedule changes  
 - energy report views  
 - thermostat adjustments  
-- feature adoption signals  
+- feature adoption  
 
-These map to:
-- Contact properties for high level metrics and automation  
-- Thermostat object for device specific usage  
+These map to Contact properties for high level automation and to Thermostat for device specific behaviour. This supports usage driven onboarding and win back campaigns and prepares Breezy for deeper AI driven insights.
 
-This supports onboarding, win back and usage based personalisation.
+### **6.2 AI feature**
 
-### **6.2 AI feature structure**
-
-The AI endpoint combines the Contact, the deals for that Contact and simulated usage metrics to produce:
-- conversion likelihood  
-- an RFM style segment  
+The AI endpoint combines Contact details, the deals for that Contact and simulated usage metrics to produce:
+- a conversion likelihood  
+- an RFM style behavioural segment  
 - reasoning  
 - a next best action  
 
-This is returned as structured JSON and displayed in the UI. It demonstrates how Breezy could use real usage data in the future to drive intelligent trial to paid conversion strategies.
+This output is then displayed in the frontend. It demonstrates how Breezy could use genuine usage data, subscription information and commercial history to power intelligent recommendations in the future.
 
-### **6.3 Writing AI insights back to HubSpot**
+### **6.3 Future idea: writing AI insight back into HubSpot**
 
-A future enhancement would be to write the AI outputs back into HubSpot as custom properties, for example:
+A strong future enhancement would be to write the AI results back to the Contact as properties such as:
 - breezy_ai_conversion_score  
 - breezy_ai_next_best_action  
 
-This would allow these insights to drive segmentation and automation within HubSpot.
+This would allow Breezy to use these insights for segmentation, automation and reporting inside HubSpot.
 
----
 
-## **7. Frontend and API Mechanics**
-
-Some implementation choices reflect an understanding of real world integration behaviour:
-- Contacts loaded using the CRM Search API with sorting by createdate to ensure newly created contacts appear at the top  
-- Fixing the shape of API responses by extracting the results array  
-- Acknowledging the limit of 50 records returned from search  
-- Adding proper loading states and error handling  
-- Accepting that HubSpot Search API has an eleven second delay for new records and building around this  
-
-These details demonstrate practical awareness of how CRM integrations behave and how to design a smooth frontend experience around them.
