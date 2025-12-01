@@ -1,6 +1,21 @@
 # HubSpot Integration Backend - Breezy Technical Assessment
 # **A. Setup Instructions**
 
+### Branch structure
+
+All work for this technical assessment was completed on the branch:
+
+`claude/setup-hubspot-contacts-api-01J9M7UsVoxBcGwVABm7SFAa`
+
+This branch contains the full solution, including:
+- frontend code
+- backend code
+- AI feature
+- ERD and full data architecture
+- final README
+
+Please review and run the project from this branch.
+
 ## **1. Clone the Repository**
 Clone the project and navigate into the folder:
 
