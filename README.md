@@ -267,4 +267,10 @@ A strong future enhancement would be to write the AI results back to the Contact
 
 This would allow Breezy to use these insights for segmentation, automation and reporting inside HubSpot.
 
+# **E. Deal Pipeline Architecture**
 
+The deal architecture for Breezy reflects two clear revenue paths: hardware purchases and subscription events. Hardware deals represent one off device purchases and sit in their own pipeline, while subscription deals represent commercial events such as initial conversion, upgrades and renewals and sit in a separate subscription pipeline. This separation keeps reporting clear and ensures hardware revenue never mixes with recurring SaaS revenue.
+
+Each subscription deal is always derived from the Subscription record itself. A workflow listens for Subscription creation and creates a Closed Won subscription deal with the correct recurring revenue fields. Later lifecycle changes, such as cancellations or upgrades, trigger updates to the inactive recurring revenue fields or the creation of new deals for upgrades. This ensures Breezy can use HubSpot revenue analytics for accurate MRR and ARR reporting.
+
+The deal pipelines are not used for trial tracking. Trial state lives directly on the Contact, which avoids unnecessary noise in the deals object and allows workflows to enrol customers based on simple property changes rather than multiple deal updates. Hardware deals associate to both the Contact and the Thermostat, while subscription deals associate to the Contact and the Subscription. This creates a clean, predictable structure for both purchase journeys.
