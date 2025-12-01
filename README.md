@@ -37,6 +37,31 @@ These are required for:
 
 > Note: `.env` is excluded from version control for security.
 
+### **HubSpot Private App Scopes**
+
+The following scopes were enabled when creating the Legacy Private App.  
+Not all scopes are used directly in the POC code, but they support the full ERD and future expansion (custom objects, line items, subscriptions):
+
+- `crm.objects.companies.read`
+- `crm.objects.companies.write`
+- `crm.objects.contacts.read`
+- `crm.objects.contacts.write`
+- `crm.objects.custom.read`
+- `crm.objects.custom.write`
+- `crm.objects.deals.read`
+- `crm.objects.deals.write`
+- `crm.objects.line_items.read`
+- `crm.objects.line_items.write`
+- `crm.objects.subscriptions.read`
+- `crm.objects.subscriptions.write`
+- `crm.schemas.custom.read`
+- `crm.schemas.custom.write`
+- `crm.schemas.line_items.read`
+- `crm.schemas.subscriptions.read`
+
+These scopes provide full read and write access to the CRM objects represented in the ERD.  
+The POC only interacts with Contacts, Deals and Subscriptions, but the additional scopes (such as custom objects and line items) reflect the wider architecture described in the data model.
+
 ---
 
 ## **4. Start the Application**
