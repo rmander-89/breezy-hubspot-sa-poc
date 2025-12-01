@@ -138,6 +138,69 @@ A practical learning from this exercise is that not all AI tools are suited to a
 
 # **D. HubSpot Data Architecture**
 
+```mermaid
+erDiagram
+
+    CONTACT ||--o{ THERMOSTAT : "owns device"
+    CONTACT ||--o{ DEAL : "has commercial events"
+    CONTACT ||--o{ SUBSCRIPTION : "subscribes via payment link"
+    CONTACT ||--o{ PAYMENT : "makes"
+
+    SUBSCRIPTION ||--o{ PAYMENT : "bills from"
+    SUBSCRIPTION ||--|| DEAL : "represented by subscription deal"
+
+    THERMOSTAT {
+        string serial_number
+        string model
+        date installation_date
+        number avg_daily_runtime
+        number thermostat_adjustments
+        number energy_reports_viewed
+        string device_status
+    }
+
+    CONTACT {
+        string firstname
+        string lastname
+        string email
+        enum trial_status
+        date trial_start_date
+        date trial_end_date
+        date last_login_date
+        number schedules_created
+        number energy_reports_viewed
+        string ai_next_best_action
+        string ai_conversion_likelihood
+    }
+
+    DEAL {
+        string dealname
+        string dealstage
+        number amount
+        number recurring_revenue_amount
+        enum recurring_revenue_deal_type
+        date recurring_revenue_inactive_date
+        enum recurring_revenue_inactive_reason
+        date close_date
+    }
+
+    SUBSCRIPTION {
+        string status
+        date billing_start_date
+        date next_payment_due
+        string billing_frequency
+        number billing_amount
+    }
+
+    PAYMENT {
+        date payment_date
+        number payment_amount
+        string payment_method
+        string status
+    }
+```
+---
+
 This section explains the data model designed for Breezy, why each object exists, how the associations work and how this structure supports Breezy’s hardware, SaaS and usage driven business. The design keeps the Contact as the single source of truth, with all other objects organised around it.
 
 ## **1. Core Object Model and Ownership**
