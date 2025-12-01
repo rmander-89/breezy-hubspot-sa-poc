@@ -134,69 +134,120 @@ Claude Code handled most of the implementation work. It created the initial fron
 I also used AI when designing the optional AI feature. The underlying model was based on my own experience with B2C HubSpot customers where usage behaviour, recency, frequency, monetary value and multi product ownership tend to be the strongest predictors of conversion and retention. I suggested an RFM (Recency, Frequency, Monetary) style approach using signals such as trial timing, login activity, schedules created and energy report views, and ChatGPT helped validate and refine that thinking. It also helped me structure the system prompt for Claude Code so that the AI endpoint would return consistent JSON.
 Claude then produced the backend endpoint that simulates usage metrics and sends them to OpenAI.
 
+Finally I used Zoom Whiteboard's generate Mermaid with AI option to create the ERD based on a detailed prompt I wrote myself.
+
 A practical learning from this exercise is that not all AI tools are suited to all parts of the workflow. I initially explored Lovable for the frontend but quickly learned it is designed for purely frontend, serverless projects, and therefore did not fit this assignment which required integrating a pre existing Express backend.
 
 # **D. HubSpot Data Architecture**
 
 ```mermaid
 erDiagram
-
-    CONTACT ||--o{ THERMOSTAT : "owns device"
-    CONTACT ||--o{ DEAL : "has commercial events"
     CONTACT ||--o{ SUBSCRIPTION : "subscribes via payment link"
-    CONTACT ||--o{ PAYMENT : "makes"
+    CONTACT ||--o{ THERMOSTAT  : "owns"
+    CONTACT ||--o{ TICKET      : "opens"
+    CONTACT ||--o{ USAGE_EVENT : "performs"
 
-    SUBSCRIPTION ||--o{ PAYMENT : "bills from"
-    SUBSCRIPTION ||--|| DEAL : "represented by subscription deal"
+    SUBSCRIPTION ||--o{ INVOICE : "bills"
+    INVOICE      ||--o{ PAYMENT : "is paid by"
 
-    THERMOSTAT {
-        string serial_number
-        string model
-        date installation_date
-        number avg_daily_runtime
-        number thermostat_adjustments
-        number energy_reports_viewed
-        string device_status
-    }
+    SUBSCRIPTION ||--o{ DEAL    : "subscription_deals"
+    THERMOSTAT   ||--o{ DEAL    : "hardware_deals"
+    THERMOSTAT   ||--o{ TICKET  : "relates to"
+
+    THERMOSTAT   ||--o{ USAGE_EVENT : "on_device"
 
     CONTACT {
+        string contact_id
+        date   last_login_date
+        int    usage_login_count_30d
+        int    usage_schedule_count_30d
+        int    usage_energy_report_views_30d
+        date   last_active_date
+        string email
         string firstname
         string lastname
-        string email
-        enum trial_status
-        date trial_start_date
-        date trial_end_date
-        date last_login_date
-        number schedules_created
-        number energy_reports_viewed
-        string ai_next_best_action
-        string ai_conversion_likelihood
-    }
-
-    DEAL {
-        string dealname
-        string dealstage
-        number amount
-        number recurring_revenue_amount
-        enum recurring_revenue_deal_type
-        date recurring_revenue_inactive_date
-        enum recurring_revenue_inactive_reason
-        date close_date
+        string phone
+        string address
+        string trial_status
+        date   trial_start_date
+        date   trial_end_date
     }
 
     SUBSCRIPTION {
-        string status
-        date billing_start_date
-        date next_payment_due
+        string subscription_id
+        string plan_name
         string billing_frequency
-        number billing_amount
+        string status
+        date   start_date
+        date   renewal_date
+        string source_payment_link_id
+    }
+
+    INVOICE {
+        string invoice_id
+        string invoice_number
+        date   invoice_date
+        date   due_date
+        float  subtotal_amount
+        float  tax_amount
+        float  total_amount
+        string status
+        string billing_period
     }
 
     PAYMENT {
-        date payment_date
-        number payment_amount
+        string payment_id
+        float  amount
+        string currency
+        date   payment_date
         string payment_method
         string status
+        string external_transaction_id
+    }
+
+    THERMOSTAT {
+        string thermostat_id
+        string serial_number
+        string model
+        date   install_date
+        string primary_location
+        float  avg_daily_runtime_hours
+        int    adjustments_per_day
+    }
+
+    DEAL {
+        string deal_id
+        date   recurring_revenue_inactive_date
+        string recurring_revenue_inactive_reason
+        string dealname
+        string pipeline
+        string dealstage
+        string deal_category
+        string subscription_deal_type
+        float  amount
+        float  recurring_revenue_amount
+        string recurring_revenue_type
+    }
+
+    TICKET {
+        string ticket_id
+        string subject
+        string status
+        string category
+        string priority
+        date   created_date
+        date   resolved_date
+        string channel
+    }
+
+    USAGE_EVENT {
+        string usage_event_id
+        string event_type
+        date   event_timestamp
+        string source
+        string context
+        string thermostat_id_fk
+        string contact_id_fk
     }
 ```
 ---
