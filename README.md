@@ -1,73 +1,99 @@
 # HubSpot Integration Backend - Breezy Technical Assessment
+# **A. Setup Instructions**
 
-1. Clone the Repository
-
+## **1. Clone the Repository**
 Clone the project and navigate into the folder:
 
+```bash
 git clone https://github.com/<your-username>/breezy-hubspot-sa-poc.git
 cd breezy-hubspot-sa-poc
+```
 
-2. Install Dependencies
+---
 
-Install all required Node.js packages:
+## **2. Install Dependencies**
+Install the required Node.js packages:
 
+```bash
 npm install
+```
 
+This prepares the backend server and the frontend files served from `/public`.
 
-This prepares the backend server and the frontend files served from /public.
+---
 
-3. Configure Environment Variables
+## **3. Configure Environment Variables**
+Create a `.env` file in the project root and add:
 
-Create a .env file in the project root and add:
-
+```
 HUBSPOT_ACCESS_TOKEN=your_hubspot_private_app_token
 OPENAI_API_KEY=your_openai_api_key
+```
 
 These are required for:
 
-Connecting to the HubSpot CRM API
+- Connecting to the HubSpot CRM API  
+- Generating AI insights via OpenAI  
 
-Generating AI insights via OpenAI
+> Note: `.env` is excluded from version control for security.
 
-Note: .env is ignored by Git and not included in the repo.
+---
 
-4. Start the Application
+## **4. Start the Application**
+Start the Express server:
 
-Run the Express server:
-
+```bash
 npm start
+```
 
 The application will be available at:
 
+```
 http://localhost:3001
+```
 
-This single server provides both the backend API and the frontend UI.
+This single server provides both the backend API and the frontend user interface.
 
-5. Open the Frontend
+---
 
+## **5. Open the Frontend**
 Visit:
 
+```
 http://localhost:3001
+```
 
-You will see the Breezy admin panel, including:
-- Contact list
-- Create Contact form
-- Deals for the selected contact
-- Create Deal form
-- AI Insight panel
+You will see the Breezy admin panel, which includes:
 
-6. Important Notes for HubSpot Testing
-A. HubSpot Search API delay (~11 seconds)
+- Contact list  
+- Create Contact form  
+- Deals for the selected contact  
+- Create Deal form  
+- AI Insight panel  
 
-Newly created contacts do not appear immediately in HubSpot Search results.
-In testing, they typically became searchable after ~11 seconds.
-The app sorts by createdate DESC so new contacts appear at the top once available.
+---
 
-B. HubSpot Search returns 50 records
+## **6. HubSpot API Notes for Testing**
 
-The CRM Search API returns only the first 50 records by default.
+### **A. HubSpot Search API delay (~11 seconds)**
+New contacts created via the API may take **up to ~11 seconds** to appear in Search API results.  
+The POC waits briefly before reloading and sorts by `createdate DESC` so new records appear at the top once indexed.
+
+### **B. HubSpot Search limit (50 records)**
+The CRM Search API returns **only the most recent 50 contacts** by default.  
 Pagination was not required for this proof-of-concept.
-## Setup Instructions
+
+---
+
+## **7. OpenAI Requirements**
+To test the AI Insight feature:
+
+- Ensure `OPENAI_API_KEY` is present in `.env`
+- The server must have internet access  
+- The `/api/ai/insight` endpoint will load automatically when a contact is selected
+
+---
+
 
 ### 1. Install Dependencies
 
