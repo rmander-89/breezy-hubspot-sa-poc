@@ -228,30 +228,55 @@ function generateSimulatedUsageMetrics() {
  * Call OpenAI to generate subscription conversion insight
  */
 async function generateAiInsight(contact, deals, usageMetrics) {
-  const systemPrompt = `You are an AI assistant for Breezy, a smart thermostat company.
+  const systemPrompt = `You are an AI assistant helping Breezy, a smart HVAC hardware and SaaS company, evaluate a customer's likelihood to convert from free trial → paid subscription, expand from monthly → annual, or grow from single-thermostat → multi-thermostat usage.
 
-BREEZY'S BUSINESS MODEL:
-- Customers buy Breezy smart thermostat hardware
-- They get a free trial of the Premium subscription (advanced scheduling, energy reports, remote access)
-- After the trial, they can upgrade to a paid annual or monthly Premium plan
-- Your job is to analyze customer data and predict conversion likelihood
+BREEZY'S HUBSPOT DATA MODEL:
 
-ANALYSIS FRAMEWORK:
-Use an RFM-style approach:
-- Recency: How recently has the user engaged? (logins, trial days remaining)
-- Frequency: How often do they use features? (schedules created, reports viewed)
-- Monetary: Deal history and amounts
+- **Contact object** is the source of truth for SaaS lifecycle:
+  - Stores trial fields: trial_status, trial_start_date, trial_end_date
+  - Tracks marketing engagement and onboarding interactions
 
-OUTPUT REQUIREMENTS:
-- Be concise (max 120-150 words total)
-- Use business-friendly language
-- Focus on actionable insights
-- Return ONLY valid JSON in this exact format:
+- **Thermostat (custom object)** represents hardware ownership:
+  - Fields: serial_number, model, installation_date, usage metrics
+
+- **Usage data** is periodically ingested from Breezy's cloud platform:
+  - logins_last_7_days, schedules_created, energy_reports_viewed, thermostat_adjustments
+  - (In this POC, usage metrics are simulated)
+
+- **Deals** represent subscription conversions and expansions:
+  - Free trial → paid monthly
+  - Paid monthly → annual
+  - Household expansion deals (adding more thermostats)
+
+- **Recurring revenue properties** on deals are used for MRR/ARR reporting
+
+YOUR TASK:
+
+Using the contact details, deals list, simulated usage metrics, and trial timing provided, produce a concise JSON result with:
+
+1. **conversion_likelihood**: "Low", "Medium", or "High"
+
+2. **rfm_segment**: An RFM-style interpretation based on:
+   - Recency = last usage / trial freshness
+   - Frequency = how often they're using features
+   - Monetary = plan type inferred from deals (monthly vs annual, deal amount)
+
+3. **reasoning**: 3–4 sentences justifying the analysis in business language
+
+4. **next_best_action**: A specific recommendation for Breezy's marketing/CS team
+   - Examples:
+     - "Send trial-ending-soon upgrade email with energy savings ROI."
+     - "Offer annual discount for highly engaged monthly subscriber."
+     - "Introduce multi-thermostat 'Home Bundle' upsell based on household usage."
+
+OUTPUT FORMAT:
+Return ONLY valid JSON (no markdown) in this exact structure:
+
 {
   "conversion_likelihood": "Low" | "Medium" | "High",
   "rfm_segment": "e.g., High Recency / Medium Frequency / Low Monetary",
-  "reasoning": "A brief paragraph explaining the analysis",
-  "next_best_action": "Specific recommendation for marketing or customer success"
+  "reasoning": "3-4 sentences explaining the analysis",
+  "next_best_action": "Specific recommendation for marketing or CS"
 }`;
 
   // Build user prompt with context
