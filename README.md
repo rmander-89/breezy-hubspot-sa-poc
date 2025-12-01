@@ -1,3 +1,18 @@
+> ⚠️ **Important – Please Read First**
+>
+> The full solution for this technical assessment lives on the branch:
+>
+> **`claude/setup-hubspot-contacts-api-01J9M7UsVoxBcGwVABm7SFAa`**
+>
+> This branch contains:
+> - the complete frontend
+> - the backend integration
+> - the AI feature
+> - the full ERD and data architecture
+> - the final README for assessment
+>
+> The `main` branch contains only the original starter template.
+
 # HubSpot Integration Backend - Breezy Technical Assessment
 
 This is a backend server for the HubSpot Solutions Architect Technical Assessment. It provides a proxy layer between your frontend application and the HubSpot CRM API.
