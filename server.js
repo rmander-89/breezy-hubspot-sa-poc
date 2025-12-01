@@ -18,10 +18,19 @@ app.use(express.static(path.join(__dirname, 'public')));
 const HUBSPOT_API_BASE = 'https://api.hubapi.com';
 const HUBSPOT_TOKEN = process.env.HUBSPOT_ACCESS_TOKEN;
 
-// Validate token on startup
+// OpenAI API configuration
+const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
+
+// Validate tokens on startup
 if (!HUBSPOT_TOKEN) {
   console.error('❌ ERROR: HUBSPOT_ACCESS_TOKEN not found in .env file');
   console.error('Please create a .env file and add your HubSpot Private App token');
+  process.exit(1);
+}
+
+if (!OPENAI_API_KEY) {
+  console.error('❌ ERROR: OPENAI_API_KEY not found in .env file');
+  console.error('Please add your OpenAI API key to the .env file');
   process.exit(1);
 }
 
@@ -196,6 +205,150 @@ app.get('/api/contacts/:contactId/deals', async (req, res) => {
     res.status(error.response?.status || 500).json({
       error: 'Failed to fetch deals for contact',
       details: error.response?.data || error.message
+    });
+  }
+});
+
+// ===== AI INSIGHT FEATURE =====
+
+/**
+ * Generate simulated usage metrics for a contact
+ * In a real app, these would come from event tracking/analytics
+ */
+function generateSimulatedUsageMetrics() {
+  return {
+    logins_last_7_days: Math.floor(Math.random() * 11), // 0-10
+    schedules_created: Math.floor(Math.random() * 11), // 0-10
+    energy_reports_viewed: Math.floor(Math.random() * 11), // 0-10
+    trial_days_remaining: Math.floor(Math.random() * 31) // 0-30
+  };
+}
+
+/**
+ * Call OpenAI to generate subscription conversion insight
+ */
+async function generateAiInsight(contact, deals, usageMetrics) {
+  const systemPrompt = `You are an AI assistant for Breezy, a smart thermostat company.
+
+BREEZY'S BUSINESS MODEL:
+- Customers buy Breezy smart thermostat hardware
+- They get a free trial of the Premium subscription (advanced scheduling, energy reports, remote access)
+- After the trial, they can upgrade to a paid annual or monthly Premium plan
+- Your job is to analyze customer data and predict conversion likelihood
+
+ANALYSIS FRAMEWORK:
+Use an RFM-style approach:
+- Recency: How recently has the user engaged? (logins, trial days remaining)
+- Frequency: How often do they use features? (schedules created, reports viewed)
+- Monetary: Deal history and amounts
+
+OUTPUT REQUIREMENTS:
+- Be concise (max 120-150 words total)
+- Use business-friendly language
+- Focus on actionable insights
+- Return ONLY valid JSON in this exact format:
+{
+  "conversion_likelihood": "Low" | "Medium" | "High",
+  "rfm_segment": "e.g., High Recency / Medium Frequency / Low Monetary",
+  "reasoning": "A brief paragraph explaining the analysis",
+  "next_best_action": "Specific recommendation for marketing or customer success"
+}`;
+
+  // Build user prompt with context
+  const dealsCount = deals.length;
+  const totalDealValue = deals.reduce((sum, deal) => {
+    const amount = parseFloat(deal.properties?.amount || 0);
+    return sum + amount;
+  }, 0);
+  const latestDealStage = deals.length > 0 ? deals[0].properties?.dealstage : 'none';
+
+  const userPrompt = `Analyze this customer for subscription conversion potential:
+
+CONTACT INFO:
+- Name: ${contact.firstname} ${contact.lastname}
+- Email: ${contact.email}
+
+USAGE METRICS (last 7 days):
+- Logins: ${usageMetrics.logins_last_7_days}
+- Schedules Created: ${usageMetrics.schedules_created}
+- Energy Reports Viewed: ${usageMetrics.energy_reports_viewed}
+- Trial Days Remaining: ${usageMetrics.trial_days_remaining}
+
+DEAL HISTORY:
+- Number of Deals: ${dealsCount}
+- Total Deal Value: $${totalDealValue.toFixed(2)}
+- Latest Deal Stage: ${latestDealStage}
+
+Provide your analysis in the required JSON format.`;
+
+  try {
+    const response = await axios.post(
+      'https://api.openai.com/v1/chat/completions',
+      {
+        model: 'gpt-4o-mini',
+        messages: [
+          { role: 'system', content: systemPrompt },
+          { role: 'user', content: userPrompt }
+        ],
+        temperature: 0.7,
+        max_tokens: 500
+      },
+      {
+        headers: {
+          'Authorization': `Bearer ${OPENAI_API_KEY}`,
+          'Content-Type': 'application/json'
+        }
+      }
+    );
+
+    const content = response.data.choices[0].message.content.trim();
+
+    // Parse JSON response (OpenAI sometimes wraps in markdown code blocks)
+    let jsonContent = content;
+    if (content.includes('```json')) {
+      jsonContent = content.split('```json')[1].split('```')[0].trim();
+    } else if (content.includes('```')) {
+      jsonContent = content.split('```')[1].split('```')[0].trim();
+    }
+
+    return JSON.parse(jsonContent);
+  } catch (error) {
+    console.error('OpenAI API error:', error.response?.data || error.message);
+    throw new Error('Failed to generate AI insight');
+  }
+}
+
+/**
+ * POST /api/ai/insight - Generate AI-powered subscription conversion insight
+ */
+app.post('/api/ai/insight', async (req, res) => {
+  try {
+    const { contact, deals } = req.body;
+
+    if (!contact || !contact.firstname || !contact.lastname) {
+      return res.status(400).json({
+        error: 'Invalid request',
+        details: 'Contact information is required'
+      });
+    }
+
+    // Generate simulated usage metrics
+    const usageMetrics = generateSimulatedUsageMetrics();
+
+    // Call OpenAI to generate insight
+    const insight = await generateAiInsight(contact, deals || [], usageMetrics);
+
+    // Return the insight along with the simulated metrics for transparency
+    res.json({
+      ...insight,
+      usage_metrics: usageMetrics
+    });
+
+  } catch (error) {
+    console.error('Error generating AI insight:', error.message);
+    res.status(500).json({
+      error: 'Failed to generate AI insight',
+      details: error.message
     });
   }
 });

@@ -2,7 +2,8 @@
 const state = {
     selectedContactId: null,
     selectedContactData: null,
-    contacts: []
+    contacts: [],
+    currentDeals: null
 };
 
 // DOM elements
@@ -74,6 +75,31 @@ async function createDeal(dealProperties, contactId) {
 
     if (!response.ok) {
         throw new Error(`Failed to create deal: ${response.statusText}`);
+    }
+    return await response.json();
+}
+
+/**
+ * Fetch AI insight for a contact
+ */
+async function fetchAiInsight(contact, deals) {
+    const response = await fetch('/api/ai/insight', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            contact: {
+                firstname: contact.firstname,
+                lastname: contact.lastname,
+                email: contact.email
+            },
+            deals: deals || []
+        })
+    });
+
+    if (!response.ok) {
+        throw new Error(`Failed to fetch AI insight: ${response.statusText}`);
     }
     return await response.json();
 }
@@ -211,6 +237,81 @@ function showDealsError(message) {
     `;
 }
 
+/**
+ * Render AI insight into the card
+ */
+function renderAiInsight(insight) {
+    const contentDiv = document.getElementById('ai-insight-content');
+    if (!contentDiv) return;
+
+    const { conversion_likelihood, rfm_segment, reasoning, next_best_action, usage_metrics } = insight;
+
+    contentDiv.innerHTML = `
+        <div class="ai-insight-data">
+            <div class="insight-row">
+                <strong>Conversion Likelihood:</strong>
+                <span class="likelihood-badge likelihood-${conversion_likelihood.toLowerCase()}">${conversion_likelihood}</span>
+            </div>
+
+            <div class="insight-row">
+                <strong>RFM Segment:</strong>
+                <span>${escapeHtml(rfm_segment)}</span>
+            </div>
+
+            <div class="insight-section">
+                <strong>Analysis:</strong>
+                <p class="insight-reasoning">${escapeHtml(reasoning)}</p>
+            </div>
+
+            <div class="insight-section">
+                <strong>Recommended Action:</strong>
+                <p class="insight-action">${escapeHtml(next_best_action)}</p>
+            </div>
+
+            ${usage_metrics ? `
+                <details class="usage-metrics-details">
+                    <summary>View Simulated Usage Data</summary>
+                    <div class="usage-metrics">
+                        <p><small>Logins (7 days): ${usage_metrics.logins_last_7_days}</small></p>
+                        <p><small>Schedules Created: ${usage_metrics.schedules_created}</small></p>
+                        <p><small>Energy Reports Viewed: ${usage_metrics.energy_reports_viewed}</small></p>
+                        <p><small>Trial Days Remaining: ${usage_metrics.trial_days_remaining}</small></p>
+                    </div>
+                </details>
+            ` : ''}
+        </div>
+    `;
+}
+
+/**
+ * Show loading state in AI insight card
+ */
+function showAiInsightLoading() {
+    const contentDiv = document.getElementById('ai-insight-content');
+    if (!contentDiv) return;
+
+    contentDiv.innerHTML = `
+        <div class="ai-loading">
+            <p>🤖 Analyzing contact data and generating insights...</p>
+        </div>
+    `;
+}
+
+/**
+ * Show error state in AI insight card
+ */
+function showAiInsightError(message) {
+    const contentDiv = document.getElementById('ai-insight-content');
+    if (!contentDiv) return;
+
+    contentDiv.innerHTML = `
+        <div class="ai-error">
+            <p style="color: #d32f2f;">⚠️ Could not generate AI insight</p>
+            <p style="font-size: 12px; color: #666;">${escapeHtml(message)}</p>
+        </div>
+    `;
+}
+
 // ===== EVENT HANDLERS =====
 
 /**
@@ -242,6 +343,9 @@ async function handleContactClick(event) {
 
     // Fetch and render deals
     await loadDealsForContact(contactId);
+
+    // Generate AI insight (non-blocking - runs in parallel)
+    loadAiInsightForContact(state.selectedContactData, contactId);
 }
 
 /**
@@ -495,9 +599,42 @@ async function loadDealsForContact(contactId) {
     try {
         const deals = await fetchDealsForContact(contactId);
         renderDeals(deals);
+        // Store deals in state for AI insight
+        state.currentDeals = deals;
     } catch (error) {
         console.error('Error loading deals:', error);
         showDealsError(error.message);
+    }
+}
+
+/**
+ * Load and render AI insight for a specific contact
+ * This runs non-blocking so the UI doesn't wait for OpenAI
+ */
+async function loadAiInsightForContact(contact, contactId) {
+    showAiInsightLoading();
+    try {
+        // Wait for deals to be loaded if not already
+        let deals = state.currentDeals || [];
+
+        // If deals aren't loaded yet, fetch them
+        if (!state.currentDeals) {
+            deals = await fetchDealsForContact(contactId);
+        }
+
+        // Prepare contact data for AI
+        const contactData = {
+            firstname: contact.properties?.firstname || contact.firstname,
+            lastname: contact.properties?.lastname || contact.lastname,
+            email: contact.properties?.email || contact.email
+        };
+
+        // Fetch AI insight
+        const insight = await fetchAiInsight(contactData, deals);
+        renderAiInsight(insight);
+    } catch (error) {
+        console.error('Error loading AI insight:', error);
+        showAiInsightError(error.message);
     }
 }
 
