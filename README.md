@@ -401,49 +401,32 @@ This approach gives Breezy a clear example of how AI could support trial to paid
 
 # **G. Design Decisions**
 
-This section outlines the key design decisions made during the development of the proof of concept. The aim was to design an approach that mirrors how Breezy would realistically integrate with HubSpot while keeping the solution simple, scalable and aligned with best practice.
+This section highlights the key architectural decisions that shaped the proof of concept. Many details are covered in earlier sections, so the focus here is on the decisions that mattered most for producing a realistic and scalable integration pattern for Breezy.
 
-## **1. Contact as the source of truth**
+## **1. Contact as the centre of the data model**
 
-I chose to place trial information, usage rollups and core identity on the Contact rather than creating a trial deal pipeline. This avoids unnecessary clutter in the deals object, keeps trial tracking simple and allows marketing workflows to enrol customers based on contact property changes. It also fits more naturally with a B2C lifecycle where the household, rather than the deal, is the anchor for behaviour and communication.
+I kept the Contact as the single source of truth for identity, trial status and usage rollups. This avoids unnecessary trial deals and keeps lifecycle automation simple for marketing teams. It also fits Breezy’s B2C model where the household is the primary unit, not individual transactions.
 
 ## **2. Thermostat as a custom object**
 
-Hardware ownership is fundamental to Breezy, so a Thermostat custom object provides a clear way to model devices independently of the person. This supports multi device households, hardware expansions and device specific support tickets. It also cleanly separates the person from the device fleet, which is important for long term scalability. It could even allow Breezy to move towards some version of inventory management in HubSpot.
+A dedicated Thermostat object keeps hardware ownership separate from the person and supports multi device households. This gives Breezy a clear way to track both device level behaviour and device specific support issues.
 
-## **3. Subscription first, deal second**
+## **3. Subscription driven workflow**
 
-I used the Subscription as the primary lifecycle trigger. When a Subscription is created, a workflow creates the matching Subscription Deal and applies the correct recurring revenue properties. This approach is more reliable than attempting to update deals from Contact based workflows, which would require association labels to identify the correct deal. Using the Subscription as the truth source keeps the revenue reporting accurate and predictable.
+Using the Subscription as the trigger for subscription deals was a deliberate choice. It provides a reliable one to one relationship with a customer’s plan and avoids the complexity of trying to update the correct deal from a Contact workflow. It also aligns naturally with HubSpot Payments, which automatically creates the Payment and Subscription objects.
 
-## **4. Use of HubSpot Payments for the POC**
+## **4. HubSpot Payments vs external checkout**
 
-HubSpot Payments offers automatic creation of Payment and Subscription objects when a payment link is completed. This reduces integration effort and works cleanly with Subscription based workflows. If Breezy wanted to use Stripe or a custom checkout they could still link out to those, then use the HubSpot CRM API to create subscription deals and a custom subscription record, but this would require Breezy to manage renewals and cancellations themselves.
+HubSpot Payments was used in this POC because it creates Subscription, Payment and Invoice records automatically. If Breezy preferred Stripe or a custom checkout process they could still link out to it and then use the CRM API to create subscription deals and a custom Subscription object, but this would require Breezy to manage renewals and cancellations themselves.
 
-## **5. Hardware deals vs subscription deals**
+## **5. Separation of hardware and subscription revenue**
 
-I separated hardware revenue and subscription revenue into different pipelines. Hardware deals link to both the Contact and the Thermostat, while subscription deals link to the Contact and the Subscription. This gives Breezy clean reporting by revenue type and makes long term MRR and ARR analysis clearer.
+Hardware deals and subscription deals were kept in separate pipelines. This keeps reporting clean and allows Breezy to distinguish clearly between one off hardware revenue and recurring subscription revenue.
 
-## **6. Use of CRM Search API**
+## **6. Handling real world behaviour of the HubSpot API**
 
-I used the CRM Search API rather than older endpoints. It is faster, more flexible and allows sorting by createdate so new contacts appear immediately when testing the POC. Search API returns results in a specific structure, so the frontend was updated to extract the results array correctly.
+I used the CRM Search API with sorting by createdate to surface newly created contacts quickly. I also accounted for the short indexing delay in HubSpot’s Search API and added the necessary handling so the UI behaves predictably.
 
-## **7. Handling HubSpot’s indexing delay**
+## **7. Simulated usage for the AI feature**
 
-HubSpot’s Search API takes a short time to index new contacts. In testing this was approximately eleven seconds. The frontend accounts for this by waiting briefly and sorting by createdate so the new record appears at the top once the platform has indexed it. This is a realistic integration behaviour and is handled gracefully in the user interface.
-
-## **8. Simulated usage rather than real ingestion**
-
-Real usage ingestion was out of scope for this assessment, so I introduced simulated usage metrics through the backend. This still demonstrates how Breezy could use usage signals in AI, onboarding workflows and retention campaigns. The architecture anticipates a future ingestion flow where usage is synced from the Breezy platform into HubSpot as events and rollup properties.
-
-## **9. AI as an insight layer rather than the system of record**
-
-The AI insight card is designed to support decision making, not replace CRM logic. The backend sends contact data, commercial history and simulated usage to OpenAI and displays the result in the UI. In a real production environment the next step would be to write the AI outputs back into HubSpot as contact properties so they can drive segmentation and automation.
-
-## **10. Single Express server for frontend and backend**
-
-I used a single Express server to serve both the API and the frontend. This keeps local development simple and avoids unnecessary configuration. The POC only requires static files and API proxies, so a combined server is the most efficient choice.
-
-## **11. Choosing Claude Code over a frontend only AI builder**
-
-I initially explored Lovable but learned it is designed for purely frontend, serverless projects. Since the assignment required working with an existing backend, Claude Code was the correct choice. This allowed me to integrate directly with the Express server and avoid working against the constraints of a tool not suited to the problem.
-
+Usage ingestion was out of scope, so I simulated usage signals in the backend. This still demonstrates how Breezy could combine trial timing, usage and deal history to generate meaningful AI insights and sets the stage for a future ingestion model.
