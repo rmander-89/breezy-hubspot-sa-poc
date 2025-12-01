@@ -199,9 +199,9 @@ Quotes or per contact payment links were rejected because they are heavy for a B
 
 ### **3.2 Commerce behaviour and alternative options if HubSpot Payments is not used**
 
-When a customer completes a HubSpot payment link, HubSpot automatically creates a Payment record and a Subscription record and associates them with the Contact based on email. HubSpot does create a Payment object whenever a link is completed. The Payment is linked to an Invoice and to the Subscription and appears inside the commerce object set.
+When a customer completes a HubSpot payment link, HubSpot automatically creates a Payment record and a Subscription record and associates them with the Contact based on email.
 
-If Breezy did not want to use HubSpot Payments there are two alternative approaches. The first is to continue linking out to a product like Stripe or a custom checkout page and then create the relevant HubSpot records through the CRM API. This could include creating a subscription deal and creating a custom subscription record. The second option is to replace the native HubSpot Subscription entirely and use a custom Subscription object that Breezy manages themselves. This gives full control but requires Breezy to implement renewals, cancellations and upgrades manually. For this assessment the native Subscription object was used because it is simpler and integrates cleanly with workflows and Payments.
+If Breezy did not want to use HubSpot Payments or Stripe they could continue using & linking out to a product like Stripe or a custom checkout page and then create the relevant HubSpot records through the CRM API. This could include creating a subscription deal and creating a custom subscription record (would need to be a custom object as the Subscription API only works with HubSpot Payments). This gives full control but requires Breezy to implement renewals, cancellations and upgrades manually. For this assessment the native Subscription object was used because it is simpler and integrates cleanly with workflows and Payments.
 
 ---
 
@@ -232,7 +232,7 @@ A new deal is created for upgrades or renewals. This allows Breezy to use HubSpo
 
 The Subscription object is the cleanest trigger for creating subscription deals because it represents the truth of what the customer has purchased. A workflow triggered on subscription creation sets the deal amount, the recurring revenue fields and the close date. When the Subscription later cancels or expires the workflow updates the inactive fields. This keeps the deal aligned with the Subscription without any risk of mismatching values.
 
-Using Contact based triggers was avoided because updating the correct deal from a Contact workflow is difficult. Workflows operate on one primary object at a time and updating a specific deal requires association labels to identify which deal to change. This introduces complexity that is not needed when the Subscription object already provides a clear and deterministic lifecycle anchor.
+Using Contact based triggers was avoided because updating the correct deal from a Contact workflow is difficult. Workflows operate on one primary object at a time and updating a specific deal requires association labels to identify which deal to change. This introduces complexity that is not needed when the Subscription object already provides a clear anchor.
 
 ---
 
