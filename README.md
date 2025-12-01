@@ -446,8 +446,3 @@ If Breezy chose not to use HubSpot Payments, they could introduce a custom Subsc
 
 ## **4. Pagination and search in the frontend**
 The POC intentionally limits contacts to the first fifty returned by HubSpot. A future version could include full pagination, free text search and filtering for a smoother admin experience.
-
-## **5. Authentication and roles**
-Adding user authentication and basic permissions would help secure the admin panel and support different internal roles such as support, marketing or operations.
-
-These enhancements reflect natural next steps once Breezy moves from a proof of concept into a long term, production grade HubSpot integration.
