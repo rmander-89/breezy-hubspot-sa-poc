@@ -10,6 +10,89 @@ cd breezy-hubspot-sa-poc
 ```
 
 ---
+
+## **2. Install Dependencies**
+Install the required Node.js packages:
+
+```bash
+npm install
+```
+
+This prepares the backend server and the frontend files served from `/public`.
+
+---
+
+## **3. Configure Environment Variables**
+Create a `.env` file in the project root and add:
+
+```
+HUBSPOT_ACCESS_TOKEN=your_hubspot_private_app_token
+OPENAI_API_KEY=your_openai_api_key
+```
+
+These are required for:
+
+- Connecting to the HubSpot CRM API  
+- Generating AI insights via OpenAI  
+
+> Note: `.env` is excluded from version control for security.
+
+---
+
+## **4. Start the Application**
+Start the Express server:
+
+```bash
+npm start
+```
+
+The application will be available at:
+
+```
+http://localhost:3001
+```
+
+This single server provides both the backend API and the frontend user interface.
+
+---
+
+## **5. Open the Frontend**
+Visit:
+
+```
+http://localhost:3001
+```
+
+You will see the Breezy admin panel, which includes:
+
+- Contact list  
+- Create Contact form  
+- Deals for the selected contact  
+- Create Deal form  
+- AI Insight panel  
+
+---
+
+## **6. HubSpot API Notes for Testing**
+
+### **A. HubSpot Search API delay (~11 seconds)**
+New contacts created via the API may take **up to ~11 seconds** to appear in Search API results.  
+The POC waits briefly before reloading and sorts by `createdate DESC` so new records appear at the top once indexed.
+
+### **B. HubSpot Search limit (50 records)**
+The CRM Search API returns **only the most recent 50 contacts** by default.  
+Pagination was not required for this proof-of-concept.
+
+---
+
+## **7. OpenAI Requirements**
+To test the AI Insight feature:
+
+- Ensure `OPENAI_API_KEY` is present in `.env`
+- The server must have internet access  
+- The `/api/ai/insight` endpoint will load automatically when a contact is selected
+
+---
 # **B. Project Overview**
 
 This proof-of-concept demonstrates how **Breezy**, a smart HVAC company, could integrate their platform with HubSpot to centralize customer data, track subscription conversions, and leverage AI for smarter lifecycle insights.
