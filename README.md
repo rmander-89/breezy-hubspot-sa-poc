@@ -1,18 +1,72 @@
 # HubSpot Integration Backend - Breezy Technical Assessment
 
-This is a backend server for the HubSpot Solutions Architect Technical Assessment. It provides a proxy layer between your frontend application and the HubSpot CRM API.
+1. Clone the Repository
 
-## Overview
+Clone the project and navigate into the folder:
 
-This Express.js server handles authentication and proxies requests to the HubSpot API. You'll build a frontend application that calls these endpoints to demonstrate how Breezy (a smart home technology company) would integrate their platform with HubSpot.
+git clone https://github.com/<your-username>/breezy-hubspot-sa-poc.git
+cd breezy-hubspot-sa-poc
 
-## Prerequisites
+2. Install Dependencies
 
-- Node.js (v14 or higher)
-- npm or yarn
-- A free HubSpot account
-- HubSpot Private App access token
+Install all required Node.js packages:
 
+npm install
+
+
+This prepares the backend server and the frontend files served from /public.
+
+3. Configure Environment Variables
+
+Create a .env file in the project root and add:
+
+HUBSPOT_ACCESS_TOKEN=your_hubspot_private_app_token
+OPENAI_API_KEY=your_openai_api_key
+
+These are required for:
+
+Connecting to the HubSpot CRM API
+
+Generating AI insights via OpenAI
+
+Note: .env is ignored by Git and not included in the repo.
+
+4. Start the Application
+
+Run the Express server:
+
+npm start
+
+The application will be available at:
+
+http://localhost:3001
+
+This single server provides both the backend API and the frontend UI.
+
+5. Open the Frontend
+
+Visit:
+
+http://localhost:3001
+
+You will see the Breezy admin panel, including:
+- Contact list
+- Create Contact form
+- Deals for the selected contact
+- Create Deal form
+- AI Insight panel
+
+6. Important Notes for HubSpot Testing
+A. HubSpot Search API delay (~11 seconds)
+
+Newly created contacts do not appear immediately in HubSpot Search results.
+In testing, they typically became searchable after ~11 seconds.
+The app sorts by createdate DESC so new contacts appear at the top once available.
+
+B. HubSpot Search returns 50 records
+
+The CRM Search API returns only the first 50 records by default.
+Pagination was not required for this proof-of-concept.
 ## Setup Instructions
 
 ### 1. Install Dependencies
