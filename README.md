@@ -100,13 +100,11 @@ You will see the Breezy admin panel, which includes:
 
 ## **6. HubSpot API Notes for Testing**
 
-### **A. HubSpot Search API delay (~11 seconds)**
-New contacts created via the API may take **up to ~11 seconds** to appear in Search API results.  
-The POC waits briefly before reloading and sorts by `createdate DESC` so new records appear at the top once indexed.
+### **A. CRM Search API behaviour**
+This POC explicitly requests the **50 most recent contacts** using the CRM Search API with a `limit` of 50 and sorting by `createdate DESC`. This keeps responses small and ensures newly created contacts appear at the top once indexed.
 
-### **B. HubSpot Search limit (50 records)**
-The CRM Search API returns **only the most recent 50 contacts** by default.  
-Pagination was not required for this proof-of-concept.
+### **B. Indexing delay for newly created contacts**
+HubSpot’s Search API does not index new contacts instantly. In testing, new contacts often took **several seconds** to become available in search results. This POC waits roughly **11 seconds** before refetching contacts to ensure consistent behaviour when demonstrating the create contact flow.
 
 ---
 
