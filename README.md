@@ -231,21 +231,20 @@ erDiagram
         string invoice_number
         date   invoice_date
         date   due_date
-        float  subtotal_amount
-        float  tax_amount
-        float  total_amount
+        number subtotal_amount
+        number tax_amount
+        number total_amount
         string status
         string billing_period
     }
 
     PAYMENT {
         string payment_id
-        float  amount
+        number amount
         string currency
         date   payment_date
         string payment_method
         string status
-        string external_transaction_id
     }
 
     THERMOSTAT {
@@ -254,8 +253,8 @@ erDiagram
         string model
         date   install_date
         string primary_location
-        float  avg_daily_runtime_hours
-        int    adjustments_per_day
+        number avg_daily_runtime_hours
+        number adjustments_per_day
     }
 
     DEAL {
@@ -267,8 +266,8 @@ erDiagram
         string dealstage
         string deal_category
         string subscription_deal_type
-        float  amount
-        float  recurring_revenue_amount
+        number amount
+        number recurring_revenue_amount
         string recurring_revenue_type
     }
 
@@ -286,7 +285,7 @@ erDiagram
     USAGE_EVENT {
         string usage_event_id
         string event_type
-        date   event_timestamp
+        datetime event_timestamp
         string source
         string context
         string thermostat_id_fk
