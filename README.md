@@ -205,9 +205,6 @@ erDiagram
     CONTACT {
         string contact_id
         date   last_login_date
-        int    usage_login_count_30d
-        int    usage_schedule_count_30d
-        int    usage_energy_report_views_30d
         date   last_active_date
         string email
         string firstname
