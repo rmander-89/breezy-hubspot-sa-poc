@@ -407,13 +407,13 @@ Although not fully implemented, the design anticipates a future state where Bree
 
 In the ERD, detailed product behaviour is captured using a `USAGE_EVENT` object. This reflects how Breezy would track real usage in a production environment. Every login, schedule creation, thermostat adjustment or energy report view becomes its own event associated to both the Contact and the relevant Thermostat. This provides a full behavioural history without overloading the Contact record.
 
-In the model, Contact properties then store only the key lifecycle moments that marketing and success or sales teams care about, such as:
+Contact properties then store only the key lifecycle moments that marketing and success or sales teams care about, such as:
 
 - last login date  
 - last active date  
 - most recent meaningful action
 
-This approach keeps the CRM clean while still enabling rich behavioural analytics. Custom events provide the full timestamped usage timeline, while Contact properties expose only high level lifecycle triggers for workflows and automation.
+This approach keeps the CRM clean while still enabling some behavioural analytics. Custom events provide the full timestamped usage timeline, while Contact properties expose only high level lifecycle triggers for workflows and automation.
 
 This supports usage driven onboarding and win back campaigns and prepares Breezy for deeper AI driven insights. 
 
@@ -473,7 +473,7 @@ Using the Subscription as the trigger for subscription deals was a deliberate ch
 
 ## **4. HubSpot Payments vs external checkout**
 
-HubSpot Payments was used in this POC because it creates Subscription, Payment and Invoice records automatically. If Breezy preferred Stripe or a custom checkout process they could still link out to it and then use the CRM API to create subscription deals and a custom Subscription object, but this would require Breezy to manage renewals and cancellations themselves.
+HubSpot Payments was used in this POC because it creates Subscription, Payment and Invoice records automatically. If Breezy preferred a custom checkout process they could still link out to it and then use the CRM API to create subscription deals and a custom Subscription object, but this would require Breezy to manage renewals and cancellations themselves.
 
 ## **5. Separation of hardware and subscription revenue**
 
