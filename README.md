@@ -409,7 +409,17 @@ Although not fully implemented, the design anticipates a future state where Bree
 - thermostat adjustments  
 - feature adoption  
 
-These map to Contact properties for high level automation and to Thermostat for device specific behaviour. This supports usage driven onboarding and win back campaigns and prepares Breezy for deeper AI driven insights. 
+In the ERD, detailed product behaviour is captured using a `USAGE_EVENT` object. This reflects how Breezy would track real usage in a production environment. Every login, schedule creation, thermostat adjustment or energy report view becomes its own event associated to both the Contact and the relevant Thermostat. This provides a full behavioural history without overloading the Contact record.
+
+In the model, Contact properties then store only the key lifecycle moments that marketing and success or sales teams care about, such as:
+
+- last login date  
+- last active date  
+- most recent meaningful action
+
+This approach keeps the CRM clean while still enabling rich behavioural analytics. Custom events provide the full timestamped usage timeline, while Contact properties expose only high level lifecycle triggers for workflows and automation.
+
+This supports usage driven onboarding and win back campaigns and prepares Breezy for deeper AI driven insights. 
 
 **For example Breezy’s marketing team could gamify onboarding by awarding users ‘climate impact points’ based on how often they use key features - celebrating milestones with messages like ‘You’ve reduced the equivalent of X lbs of carbon’ or ‘You just planted 3 virtual trees!’ This turns product adoption into a fun, meaningful progression tied to real environmental impact.**
 
