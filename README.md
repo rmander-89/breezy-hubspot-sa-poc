@@ -133,7 +133,7 @@ To test the AI Insight feature:
 ---
 # **B. Project Overview**
 
-This proof-of-concept demonstrates how **Breezy**, a smart HVAC company, could integrate their platform with HubSpot to centralize customer data, track subscription conversions, and leverage AI for smarter lifecycle insights.
+This proof-of-concept demonstrates how **Breezy** could integrate their platform with HubSpot to unify customer data, track subscription conversions, and leverage AI for insights into conversion opportunities.
 
 The POC includes:
 
@@ -157,32 +157,30 @@ The POC includes:
   - Subscriptions, invoices, and payments  
   - Usage events and tickets  
 
-The goal of this POC is to show how Breezy could use HubSpot as a unified customer system—connecting hardware purchases, subscription lifecycle events, usage-driven insights, and AI-powered next-best actions into a single place where marketing and success teams can act.
-
-This is intentionally a simplified demonstration focused on integration patterns and architecture, rather than a production-ready application.
+The goal of this POC is to show how Breezy could use HubSpot as a unified customer system—connecting hardware purchases, subscription lifecycle events, usage-driven insights, and AI-powered next-best actions into a single place where marketing, sales and potentially customer success teams can act.
 
 # **C. AI Usage Documentation**
 
 ### **AI model usage during development**
 
-For clarity, two different AI models were used during the development of this proof of concept:
+Two different AI models were used predominantly during the development of this proof of concept:
 
 - **ChatGPT 5.1 (UI model):**  
-  Used for planning, reasoning through design choices, validating the RFM concept and refining prompts before sending them to Claude Code.
+  Used for planning, reasoning through design choices, validating the Recency, Frequency, Monetary concept for the AI feature and refining prompts before sending them to Claude Code.
 
 - **Claude Code (Sonnet 4.5):**  
   Used in browser to generate and update frontend and backend files, implement API logic and build the AI endpoint based on the refined prompts.
 
-I used AI throughout this assessment as a support, not as the decision maker. The structure, architecture and approach all came from my own interpretation of Breezy’s business model and the assignment requirements. AI was used to accelerate specific tasks, validate thinking and help generate clean, testable code.
+I used AI throughout this assessment. The structure, architecture and approach all came from my own interpretation of Breezy’s business model and the assignment requirements. AI was used to accelerate specific tasks, validate thinking and help generate clean, testable code.
 
 I used ChatGPT mainly for guidance at key points. Early on it helped clarify some practical setup tasks, such as getting the starter repository into VS Code, understanding how the backend was structured and confirming the correct workflow when Claude Code was committing changes directly to GitHub. I also used ChatGPT to help refine prompts before sending them to Claude Code. Rather than giving Claude one large instruction, I used ChatGPT to break the work into focused, assignment-aligned prompts covering contacts, deals, the admin layout and basic styling.
 
 Claude Code handled most of the implementation work. It created the initial frontend structure, wrote the JavaScript for calling the backend API routes, and generated the UX for loading states, error handling and record creation. As I tested the app locally I identified issues, such as the shape of HubSpot’s Search API response or the delay before new contacts appear. I then wrote more targeted prompts to Claude to update the code where needed.
 
-I also used AI when designing the optional AI feature. The underlying model was based on my own experience with B2C HubSpot customers where usage behaviour, recency, frequency, monetary value and multi product ownership tend to be the strongest predictors of conversion and retention. I suggested an RFM (Recency, Frequency, Monetary) style approach using signals such as trial timing, login activity, schedules created and energy report views, and ChatGPT helped validate and refine that thinking. It also helped me structure the system prompt for Claude Code so that the AI endpoint would return consistent JSON.
+I also used AI when designing the optional AI feature. The underlying model was based on my own experience with B2C HubSpot customers where usage, recency, frequency, monetary value of purchase and multi product ownership tend to be the strongest predictors of conversion and retention. I suggested an RFM (Recency, Frequency, Monetary) style approach using signals such as trial timing, login activity, schedules created and energy report views, and ChatGPT helped validate and refine that thinking. It also helped me structure the system prompt for Claude Code so that the AI endpoint would return consistent JSON.
 Claude then produced the backend endpoint that simulates usage metrics and sends them to OpenAI.
 
-Finally I used Zoom Whiteboard's generate Mermaid with AI option to create the ERD based on a detailed prompt I wrote myself.
+Finally, I used Zoom Whiteboard’s ‘Generate Mermaid with AI’ feature to create the ERD using a detailed prompt that I wrote myself.
 
 A practical learning from this exercise is that not all AI tools are suited to all parts of the workflow. I initially explored Lovable for the frontend but quickly learned it is designed for purely frontend, serverless projects, and therefore did not fit this assignment which required integrating a pre existing Express backend.
 
@@ -300,7 +298,7 @@ erDiagram
 ```
 ---
 
-This section explains the data model designed for Breezy, why each object exists, how the associations work and how this structure supports Breezy’s hardware, SaaS and usage driven business. The design keeps the Contact as the single source of truth, with all other objects organised around it.
+This section explains the data model designed for Breezy, why each object exists, how the associations work and how this structure supports Breezy’s hardware + SaaS business model. The design keeps the Contact as the single source of truth, with all other objects organised around it.
 
 ## **1. Core Object Model and Ownership**
 
@@ -330,7 +328,7 @@ Example properties include:
 - energy_savings_score  
 - device_status  
 
-Thermostats are associated with the Contact so Breezy can understand which devices belong to which household. Tickets and hardware deals link to Thermostats so device level issues and purchases can be tracked clearly. In the future Breezy could optionally associate Thermostats with Subscriptions if they ever move to a per device subscription model.
+Thermostats are associated with the Contact so Breezy can understand which devices belong to which household. Tickets and hardware deals link to Thermostats so device level issues and purchases can be tracked clearly. In the future Breezy could optionally associate Thermostats with Subscriptions if they ever move to a multiple subscription model.
 
 ---
 
@@ -347,7 +345,7 @@ This ties the SaaS trial to the device lifecycle and avoids generating unnecessa
 
 ### **2.2 No separate trial deal pipeline**
 
-There were two possible approaches to modelling trials. The first was to create a separate trial pipeline with one deal per trial. The second was to store trial status entirely on the Contact. I chose the second option. It avoids creating unnecessary deals, reduces CRM noise and works better with marketing automation because workflows can enrol based on simple property values rather than deal updates. It also avoids the complexity of updating the right deal later.
+There were two possible approaches to modelling trials. The first was to create a separate trial pipeline with one deal (or other object) per trial. The second was to store trial status entirely on the Contact. I chose the second option. It avoids creating unnecessary deals / records, reduces CRM noise and works better with marketing automation because workflows can enrol based on simple property values rather than deal updates. It also avoids the complexity of updating the right deal later.
 
 ---
 
@@ -359,11 +357,13 @@ For subscription upgrades the simplest and most scalable approach is to use two 
 
 Quotes or per contact payment links were rejected because they are heavy for a B2C workflow, difficult to scale and unnecessary when a simple static link is sufficient.
 
+Using the static payment links Breezy's marketing team can implement two CTAs or buttons in marketing emails to drive upgrades to paid subscriptions. Example copy - "Your free trial ends in 7 days - upgrade now to maintain access: Button 1 - Monthly @ $9.99 or Button 2 - Save 15% with an Annual Subscription!
+
 ### **3.2 Commerce behaviour and alternative options if HubSpot Payments is not used**
 
-When a customer completes a HubSpot payment link, HubSpot automatically creates a Payment record and a Subscription record and associates them with the Contact based on email.
+When a customer completes a HubSpot payment link, HubSpot automatically creates a Payment record and a Subscription record and associates them with the Contact based on email. Breezy should store payment methods for future charges meaning that at each billing date HubSpot will collect payment + create an invoice & receipt.
 
-If Breezy did not want to use HubSpot Payments or Stripe they could continue using & linking out to a product like Stripe or a custom checkout page and then create the relevant HubSpot records through the CRM API. This could include creating a subscription deal and creating a custom subscription record (would need to be a custom object as the Subscription API only works with HubSpot Payments). This gives full control but requires Breezy to implement renewals, cancellations and upgrades manually. For this assessment the native Subscription object was used because it is simpler and integrates cleanly with workflows and Payments.
+If Breezy did not want to use HubSpot Payments or Stripe they could continue using & linking out to an alternative payments product or a custom checkout page and then create the relevant HubSpot records through the CRM API. This could include creating a subscription deal and creating a custom subscription record (would need to be a custom object as the Subscription API only works with HubSpot Payments). This gives full control but requires Breezy to implement renewals, cancellations and upgrades manually. For this assessment the native Subscription object was used because it is simpler and integrates cleanly with workflows and Payments.
 
 ---
 
@@ -384,7 +384,7 @@ When subscriptions change state the workflow updates the inactive fields such as
 - recurring_revenue_inactive_date  
 - recurring_revenue_inactive_reason  
 
-A new deal is created for upgrades or renewals. This allows Breezy to use HubSpot’s recurring revenue analytics for accurate MRR and ARR reporting.
+A new deal is created for upgrades or renewals. This allows Breezy to use HubSpot’s recurring revenue analytics for accurate MRR and ARR reporting on monthly and annual subscriptions.
 
 ---
 
@@ -409,7 +409,7 @@ Although not fully implemented, the design anticipates a future state where Bree
 - thermostat adjustments  
 - feature adoption  
 
-These map to Contact properties for high level automation and to Thermostat for device specific behaviour. This supports usage driven onboarding and win back campaigns and prepares Breezy for deeper AI driven insights.
+These map to Contact properties for high level automation and to Thermostat for device specific behaviour. This supports usage driven onboarding and win back campaigns and prepares Breezy for deeper AI driven insights. For example Breezy’s marketing team could gamify onboarding by awarding users ‘climate impact points’ based on how often they use key features - celebrating milestones with messages like ‘You’ve reduced the equivalent of X lbs of carbon’ or ‘You just planted 3 virtual trees!’ This turns product adoption into a fun, meaningful progression tied to real environmental impact.
 
 ### **6.2 AI feature**
 
