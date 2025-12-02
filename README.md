@@ -409,7 +409,9 @@ Although not fully implemented, the design anticipates a future state where Bree
 - thermostat adjustments  
 - feature adoption  
 
-These map to Contact properties for high level automation and to Thermostat for device specific behaviour. This supports usage driven onboarding and win back campaigns and prepares Breezy for deeper AI driven insights. For example Breezy’s marketing team could gamify onboarding by awarding users ‘climate impact points’ based on how often they use key features - celebrating milestones with messages like ‘You’ve reduced the equivalent of X lbs of carbon’ or ‘You just planted 3 virtual trees!’ This turns product adoption into a fun, meaningful progression tied to real environmental impact.
+These map to Contact properties for high level automation and to Thermostat for device specific behaviour. This supports usage driven onboarding and win back campaigns and prepares Breezy for deeper AI driven insights. 
+
+**For example Breezy’s marketing team could gamify onboarding by awarding users ‘climate impact points’ based on how often they use key features - celebrating milestones with messages like ‘You’ve reduced the equivalent of X lbs of carbon’ or ‘You just planted 3 virtual trees!’ This turns product adoption into a fun, meaningful progression tied to real environmental impact.**
 
 ### **6.2 AI feature**
 
@@ -431,11 +433,11 @@ This would allow Breezy to use these insights for segmentation, automation and r
 
 # **E. Deal Pipeline Architecture**
 
-The deal architecture for Breezy reflects two clear revenue paths: hardware purchases and subscription events. Hardware deals represent one off device purchases and sit in their own pipeline, while subscription deals represent commercial events such as initial conversion, upgrades and renewals and sit in a separate subscription pipeline. This separation keeps reporting clear and ensures hardware revenue never mixes with recurring SaaS revenue.
+The deal architecture for Breezy reflects two clear revenue paths: hardware purchases and subscription signups. Hardware deals represent one off device purchases and sit in their own pipeline, while subscription deals represent events such as initial subscription conversion, upgrades and renewals and sit in a separate subscription pipeline. This separation keeps reporting clear and ensures hardware revenue never mixes with recurring SaaS revenue.
 
 Each subscription deal is always derived from the Subscription record itself. A workflow listens for Subscription creation and creates a Closed Won subscription deal with the correct recurring revenue fields. Later lifecycle changes, such as cancellations or upgrades, trigger updates to the inactive recurring revenue fields or the creation of new deals for upgrades. This ensures Breezy can use HubSpot revenue analytics for accurate MRR and ARR reporting.
 
-The deal pipelines are not used for trial tracking. Trial state lives directly on the Contact, which avoids unnecessary noise in the deals object and allows workflows to enrol customers based on simple property changes rather than multiple deal updates. Hardware deals associate to both the Contact and the Thermostat, while subscription deals associate to the Contact and the Subscription. This creates a clean, predictable structure for both purchase journeys.
+The deal pipelines are not used for trial tracking. Trial state lives directly on the Contact, which avoids unnecessary noise in the deals object or another custom object and allows workflows to enrol customers based on simple property changes rather than multiple deal updates. Hardware deals associate to both the Contact and the Thermostat, while subscription deals associate to the Contact and the Subscription. This creates a clean, predictable structure for both purchase journeys.
 
 # **F. AI Feature Explanation**
 
